@@ -17,10 +17,14 @@ Shader "Custom/GamingRGBLine"
         _Space2 ("Space2", Range(0.0005, 0.02)) = 0.0011
         _Speed2 ("Speed2", Range(0.5, 5)) = 0.5
         _Freq2 ("Freq2", Range(0.8, 10)) = 4.91
+        _Cutoff("Cutoff", Range(0, 1)) = 0.5
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags {
+            "Queue" = "AlphaTest"
+            "RenderType" = "TransparentCutoff"
+        }
         LOD 100
 
         Pass
@@ -59,15 +63,13 @@ Shader "Custom/GamingRGBLine"
             float _Space2;
             float _Speed2;
             float _Freq2;
-
-            float g;
+            float _Cutoff;
 
             v2f vert (appdata v)
             {
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
-                UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
@@ -100,7 +102,7 @@ Shader "Custom/GamingRGBLine"
                     texcol.z * (1 - _Decol) + ave_de,
                 1);
                 fixed4 o = clamp(fixed4(r, g, b, 1), 0, 1) + col * _TextureIntensity;
-                //UNITY_APPLY_FOG(i.fogCoord, col);
+                clip(texcol.a - _Cutoff);
                 return o;
             }
             ENDCG

@@ -18,10 +18,14 @@ Shader "Custom/GamingRGB"
         _FreqR ("Freq_R", Range(0.3, 3)) = 1
         _FreqG ("Freq_G", Range(0.3, 3)) = 1
         _FreqB ("Freq_B", Range(0.3, 3)) = 1
+        _Cutoff("Cutoff", Range(0, 1)) = 0.5
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags {
+            "Queue" = "AlphaTest"
+            "RenderType" = "TransparentCutoff"
+            }
         LOD 100
 
         Pass
@@ -61,6 +65,7 @@ Shader "Custom/GamingRGB"
             float _FreqR;
             float _FreqG;
             float _FreqB;
+            float _Cutoff;
 
             v2f vert (appdata v)
             {
@@ -90,7 +95,7 @@ Shader "Custom/GamingRGB"
                      1) * _TexIntensity +
                 (fixed4(gaming_col * _RGBIntensity, 1)),
                 0, 1);
-                //UNITY_APPLY_FOG(i.fogCoord, col);
+                clip(col.a - _Cutoff);
                 return o;
             }
             ENDCG
